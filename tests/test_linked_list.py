@@ -174,7 +174,7 @@ class TestLinkedList():
         assert dupe.count(3) == 1
         assert dupe.count(4) == 0
 
-    def text_index(self, ll_gen):
+    def test_indexing(self, ll_gen):
         assert self.ll_data_1.index(2) == 1
         assert self.ll_data_1.index(3) == 2
         with pytest.raises(ValueError):
@@ -216,8 +216,8 @@ class TestLinkedList():
         empty = self.ll_data_1 * 0
         still_empty = self.ll_data_1 * (-3)
         assert list(new) == [1, 2, 3, 1, 2, 3, 1, 2, 3]
-        assert list(empty) == 0
-        assert list(still_empty) == 0
+        assert list(empty) == []
+        assert list(still_empty) == []
         assert len(new) == 9
         assert len(empty) == 0
         assert len(still_empty) == 0
