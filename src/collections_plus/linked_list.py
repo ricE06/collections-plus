@@ -39,7 +39,7 @@ class LinkedList():
         tail: the last LinkedListNode in the list.
     """
 
-    def __init__(self, *values: Optional[Iterable[Any]] = tuple()) -> None:
+    def __init__(self, *values: Optional[Iterable[Any]]) -> None:
         self._head = LinkedListNode(None) # sentinel node
         self._tail = self._head
         self._length = 0
@@ -71,39 +71,43 @@ class LinkedList():
             for _ in range(index):
                 prev_node = node
                 node = node.next
-            return func(prev_node, node, *args, **kwargs)
+            return func(self, node, prev_node, *args, **kwargs)
 
         return wrapper
+
+    def __str__(self):
+        return self.__repr__()
 
     def __repr__(self):
         out = "LinkedList("
         node = self._head.next
         for idx in range(self._length):
-            out += str(node)
+            out += str(node.value)
+            node = node.next
             if idx < self._length - 1: out += ", "
         out += ")"
         return out
 
     @index_into
-    def __getitem__(self, prev_node: LinkedListNode, node: LinkedListNode) -> Any:
+    def __getitem__(self, node: LinkedListNode, prev_node: LinkedListNode, *args, **kwargs) -> Any:
         """
         Returns the value at the specified node.
         """
         return node.value
 
     @index_into
-    def __setitem__(self, prev_node: LinkedListNode, node: LinkedListNode, val: Any) -> None:
+    def __setitem__(self, node: LinkedListNode, prev_node: LinkedListNode, val: Any) -> None:
         """
         Sets the value at the specified node to `val`.
         """
         node.value = val
 
     @index_into
-    def __delitem__(self, prev_node: LinkedListNode, node: LinkedListNode) -> None:
+    def __delitem__(self, node: LinkedListNode, prev_node: LinkedListNode) -> None:
         next_node = node.next
         prev_node.next = next_node
         self._length -= 1
-        del node
+        del self
 
     def __len__(self) -> int:
         return self._length
