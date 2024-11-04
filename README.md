@@ -118,6 +118,7 @@ for val in reversed(my_dll):
 Data structures that are planned:
 
 - Min and max heaps
+- Priority queue
 - Circularly linked lists
 - Binary trees
 - AVL tree
