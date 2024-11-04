@@ -1,9 +1,12 @@
 # unit tests for the Linked List class
 
-from src.collections_plus import LinkedList
+from src.collections_plus import LinkedList, DoublyLinkedList
 import pytest
 
 class TestLinkedList():
+
+    def create_instance(self, *values):
+        return LinkedList(*values)
 
     @pytest.fixture
     def ll_gen(self):
@@ -11,6 +14,7 @@ class TestLinkedList():
         self.ll_singular = LinkedList(0)
         self.ll_data_1 = LinkedList(1, 2, 3)
         self.ll_data_2 = LinkedList(4, 5, 6, 7)
+        self.another = LinkedList(1, 2, 3)
 
     @pytest.fixture
     def ll_big(self):
@@ -45,11 +49,11 @@ class TestLinkedList():
 
     def test_set_simple(self, ll_gen):
         self.ll_data_1[1] = 4
-        assert str(self.ll_data_1) == "LinkedList(1, 4, 3)"
+        assert list(self.ll_data_1) == [1, 4, 3]
         self.ll_data_1[2] = 10
-        assert str(self.ll_data_1) == "LinkedList(1, 4, 10)"
+        assert list(self.ll_data_1) == [1, 4, 10]
         self.ll_data_1[-3] = "first"
-        assert str(self.ll_data_1) == "LinkedList(first, 4, 10)"
+        assert list(self.ll_data_1) == ["first", 4, 10]
 
     def test_set_errors(self, ll_gen):
         with pytest.raises(IndexError):
@@ -61,11 +65,11 @@ class TestLinkedList():
 
     def test_del_simple(self, ll_gen):
         del self.ll_data_2[0]
-        assert str(self.ll_data_2) == "LinkedList(5, 6, 7)"
+        assert list(self.ll_data_2) == [5, 6, 7]
         del self.ll_data_2[-2]
-        assert str(self.ll_data_2) == "LinkedList(5, 7)"
+        assert list(self.ll_data_2) == [5, 7]
         del self.ll_singular[0]
-        assert str(self.ll_singular) == "LinkedList()"
+        assert list(self.ll_singular) == []
 
     def test_del_errors(self, ll_gen):
         with pytest.raises(IndexError):
@@ -93,24 +97,23 @@ class TestLinkedList():
         assert values_empty == []
 
     def test_equality(self, ll_gen):
-        another = LinkedList(1, 2, 3)
-        assert (another == self.ll_data_1) == True
-        assert (another != self.ll_data_1) == False
-        assert (another == self.ll_data_2) == False
-        other_empty = LinkedList()
+        assert (self.another == self.ll_data_1) == True
+        assert (self.another != self.ll_data_1) == False
+        assert (self.another == self.ll_data_2) == False
+        other_empty = self.create_instance()
         assert (other_empty == self.ll_empty) == True
 
     def test_comparison(self, ll_gen):
-        another = LinkedList(1, 2, 4)
+        another = self.create_instance(1, 2, 4)
         assert (another > self.ll_data_1) == True
         assert (another < self.ll_data_1) == False
-        shorter = LinkedList(1, 10)
+        shorter = self.create_instance(1, 10)
         assert (shorter > self.ll_data_1) == True
-        same = LinkedList(1, 2, 3)
+        same = self.create_instance(1, 2, 3)
         assert (same >= self.ll_data_1) == True
         assert (same <= self.ll_data_1) == True
         assert (same > self.ll_data_1) == False
-        same_but_longer = LinkedList(1, 2, 3, -4)
+        same_but_longer = self.create_instance(1, 2, 3, -4)
         assert (same_but_longer > self.ll_data_1) == True
 
     def test_comparison_errors(self, ll_gen):
@@ -128,17 +131,17 @@ class TestLinkedList():
     def test_pop(self, ll_gen):
         popped = self.ll_data_1.pop()
         assert popped == 1
-        assert str(self.ll_data_1) == "LinkedList(2, 3)"
+        assert list(self.ll_data_1) == [2, 3]
         popped = self.ll_data_1.pop()
         assert popped == 2
-        assert str(self.ll_data_1) == "LinkedList(3)"
+        assert list(self.ll_data_1) == [3]
         assert len(self.ll_data_1) == 1
         popped = self.ll_data_2.pop(2)
         assert popped == 6
-        assert str(self.ll_data_2) == "LinkedList(4, 5, 7)"
+        assert list(self.ll_data_2) == [4, 5, 7]
         popped = self.ll_data_2.pop(-2)
         assert popped == 5
-        assert str(self.ll_data_2) == "LinkedList(4, 7)"
+        assert list(self.ll_data_2) == [4, 7]
         assert len(self.ll_data_2) == 2
 
     def test_append(self, ll_gen):
@@ -168,7 +171,7 @@ class TestLinkedList():
         assert len(self.ll_singular) == 2
 
     def test_count(self):
-        dupe = LinkedList(1, 1, 3, 1, 2, 2)
+        dupe = self.create_instance(1, 1, 3, 1, 2, 2)
         assert dupe.count(1) == 3
         assert dupe.count(2) == 2
         assert dupe.count(3) == 1
@@ -242,8 +245,43 @@ class TestLinkedList():
         with pytest.raises(TypeError):
             dummy = self.ll_data_1 * 1.5
         
+class TestDoublyLinkedList(TestLinkedList):
+   
+    def create_instance(self, *values):
+        return DoublyLinkedList(*values)
 
+    @pytest.fixture
+    def ll_gen(self):
+        self.ll_empty = DoublyLinkedList()
+        self.ll_singular = DoublyLinkedList(0)
+        self.ll_data_1 = DoublyLinkedList(1, 2, 3)
+        self.another = DoublyLinkedList(1, 2, 3)
+        self.ll_data_2 = DoublyLinkedList(4, 5, 6, 7)
 
+    def test_repr(self, ll_gen):
+        assert str(self.ll_empty) == "DoublyLinkedList()"
+        assert str(self.ll_singular) == "DoublyLinkedList(0)"
+        assert str(self.ll_data_1) == "DoublyLinkedList(1, 2, 3)"
 
-            
+    def test_pop_special(self, ll_gen):
+        val = self.ll_data_2.lpop()
+        assert val == 4
+        assert list(self.ll_data_2) == [5, 6, 7]
+        val_2 = self.ll_data_2.rpop()
+        assert val_2 == 7
+        assert list(self.ll_data_2) == [5, 6]
+        val_3 = self.ll_data_2.lpop()
+        assert val_3 == 5
+        assert list(self.ll_data_2) == [6]
+        with pytest.raises(IndexError):
+            dummy = self.ll_empty.lpop()
+        with pytest.raises(IndexError):
+            dummy = self.ll_empty.rpop()
+
+    def test_lappend(self, ll_gen):
+        self.ll_data_2.lappend(3)
+        assert list(self.ll_data_2) == [3, 4, 5, 6, 7]
+        self.ll_empty.lappend(1)
+        assert list(self.ll_empty) == [1]
+
 

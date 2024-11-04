@@ -114,7 +114,7 @@ class LinkedList():
         Returns a string representation of the LinkedList.
         Identical to __str__.
         """
-        out = "LinkedList("
+        out = self.__class__.__name__ + "("
         node = self._head.next
         for idx in range(self._length):
             out += str(node.value)
@@ -177,7 +177,8 @@ class LinkedList():
         @wraps(func)
         def wrapper(self, other, *args, **kwargs):
             if not isinstance(other, self.__class__):
-                raise TypeError("Can only compare LinkedLists to a LinkedList")
+                name = self.__class__.__name__
+                raise TypeError(f"Can only compare {name} to a {name}")
             return func(self, other, *args, **kwargs)
 
         return wrapper
@@ -357,7 +358,7 @@ class LinkedList():
 
         Returns: a LinkedList object with the same values as the original.
         """
-        out = LinkedList(*(self))
+        out = self.__class__(*(self))
         return out
 
     @_require_same_type
@@ -373,7 +374,7 @@ class LinkedList():
         Returns: a LinkedList with the values of the original (self) LinkedList,
             followed by the values of the second LinkedList.
         """
-        out = LinkedList(*(self))
+        out = self.__class__(*(self))
         out.extend(other)
         return out
 
@@ -394,8 +395,8 @@ class LinkedList():
         if not isinstance(times, int):
             raise TypeError("Can only multiply LinkedList by an integer.")
         if times <= 0:
-            return LinkedList()
-        out = LinkedList(*(self))
+            return self.__class__()
+        out = self.__class__(*(self))
         for _ in range(times-1):
             out.extend(self)
         return out
