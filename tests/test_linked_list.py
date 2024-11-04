@@ -187,6 +187,15 @@ class TestLinkedList():
         with pytest.raises(IndexError):
             dummy = self.ll_data_1.insert(5, 10)
 
+    def test_insertion_tail_update(self, ll_gen):
+        self.ll_data_1.insert(3, 5)
+        assert list(self.ll_data_1) == [1, 2, 3, 5]
+        self.ll_data_1.insert(4, 8)
+        assert list(self.ll_data_1) == [1, 2, 3, 5, 8]
+        self.ll_data_1.extend(self.ll_data_2)
+        assert list(self.ll_data_1) == [1, 2, 3, 5, 8, 4, 5, 6, 7]
+
+
     def test_removal(self, ll_gen):
         self.ll_data_2.remove(6)
         assert list(self.ll_data_2) == [4, 5, 7]

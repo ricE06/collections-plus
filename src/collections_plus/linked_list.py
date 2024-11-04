@@ -60,28 +60,47 @@ class LinkedList():
         self._tail = prev_node
 
     @staticmethod
-    def index_into(func):
+    def index_into(force_pos_range=True, min_index_offset = 0, max_index_offset = 0):
         """
         Decorator to call the function once we have
         reached the proper index node.
-        Range of indices allowed is (-len) to (+len-1), inclusive.
+        Default of indices allowed is (-len) to (+len), lower inclusive and 
+        upper exclusive.
         """
-        @wraps(func)
-        def wrapper(self, index: Optional[int] = 0, *args, **kwargs) -> None:
-            if not isinstance(index, int):
-                raise TypeError("Index into LinkedList must be an integer.")
-            if not -self._length <= index < self._length:
-                raise IndexError("LinkedList index out of range.")
-            if index < 0: index += self._length
+        def decorator(func):
 
-            prev_node = self._head
-            node = self._head.next
-            for _ in range(index):
-                prev_node = node
-                node = node.next
-            return func(self, node, prev_node, *args, **kwargs)
+            @wraps(func)
+            def wrapper(self, index: Optional[int] = 0, *args, **kwargs) -> None:
+                min_index = -self._length + min_index_offset
+                max_index = self._length + max_index_offset
+                if not isinstance(index, int):
+                    raise TypeError("Index into LinkedList must be an integer.")
+                if not min_index <= index < max_index: 
+                    raise IndexError("LinkedList index out of range.")
+                if force_pos_range and index < 0: index += self._length
+                return func(self, index, *args, **kwargs)
 
-        return wrapper
+            return wrapper
+
+        return decorator
+
+    def _retrieve_node(self, index):
+        """
+        Returns the node found at `index` and the node at
+        `index-1` as a tuple.
+        """
+        prev_node = self._head
+        node = self._head.next
+        for _ in range(index):
+            prev_node = node
+            node = node.next
+        return prev_node, node
+
+    def _bring_index_in_range(self, index):
+        """
+        If index is negative, returns the equivalent positive index.
+        """
+        return index if index >= 0 else index + self._length
 
     def __str__(self):
         """
@@ -104,26 +123,29 @@ class LinkedList():
         out += ")"
         return out
 
-    @index_into
-    def __getitem__(self, node: LinkedListNode, prev_node: LinkedListNode, *args, **kwargs) -> Any:
+    @index_into()
+    def __getitem__(self, index: int, *args, **kwargs) -> Any:
         """
         Returns the value at the specified node.
         """
+        _, node = self._retrieve_node(index)
         return node.value
 
-    @index_into
-    def __setitem__(self, node: LinkedListNode, prev_node: LinkedListNode, val: Any) -> None:
+    @index_into()
+    def __setitem__(self, index: int, val: Any) -> None:
         """
         Sets the value at the specified node to `val`.
         """
+        _, node = self._retrieve_node(index)
         node.value = val
 
-    @index_into
-    def __delitem__(self, node: LinkedListNode, prev_node: LinkedListNode) -> None:
+    @index_into()
+    def __delitem__(self, index: int) -> None:
         """
         Removes the value at the specified node and reroutes the pointers to
         stitch the LinkedList back together.
         """
+        prev_node, node = self._retrieve_node(index)
         next_node = node.next
         prev_node.next = next_node
         self._length -= 1
@@ -208,8 +230,8 @@ class LinkedList():
             return self_val < other_val
         return len(self) <= len(other)
 
-    @index_into
-    def pop(self, node: LinkedListNode, prev_node: LinkedListNode) -> Any: 
+    @index_into()
+    def pop(self, index: int) -> Any: 
         """
         Removes the node at the specified index and returns its value.
         Note that because of how decorators work, the type hints / autocomplete
@@ -222,6 +244,7 @@ class LinkedList():
         Returns:
             the value at the specified node.
         """
+        prev_node, node = self._retrieve_node(index)
         next_node = node.next
         prev_node.next = next_node
         out = node.value
@@ -289,8 +312,8 @@ class LinkedList():
                 return idx
         raise ValueError("Value was not found in LinkedList.")
 
-    @index_into
-    def insert(self, node: LinkedListNode, prev_node: LinkedListNode, value: Any) -> None:
+    @index_into(max_index_offset=1)
+    def insert(self, index: int, value: Any) -> None:
         """
         Inserts `value` into the LinkedList at position `index`. Note that because
         of function decorators, autocomplete/typehints may lie to you.
@@ -301,9 +324,14 @@ class LinkedList():
 
         Returns: none
         """
+        if index == self._length:
+            self.append(value)
+            return
+        prev_node, node = self._retrieve_node(index)
         new_node = LinkedListNode(value, node)
         prev_node.next = new_node
         self._length += 1
+        # we won't actually insert into the end of the list, so everything is okay
 
     def remove(self, value: Any) -> None:
         """
